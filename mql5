@@ -1,0 +1,76 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                                     EA Monolith  |
+//|                                 Developed by Forex Robot Easy Team |
+//|                                        Developer's site: forexroboteasy.com |
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//|                        Global Variables                           |
+//+------------------------------------------------------------------+
+double drawdownLimit = 0.2; // Maximum allowed drawdown
+int totalOrders = 0; // Total number of open orders
+
+//+------------------------------------------------------------------+
+//|                     Expert Advisor Initialization                |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Set up necessary trading functions
+   // ...
+   return INIT_SUCCEEDED;
+}
+
+//+------------------------------------------------------------------+
+//|                     Expert Advisor Deinitialization              |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Close all open orders before deinitialization
+   CloseAllOrders();
+}
+
+//+------------------------------------------------------------------+
+//|                       Expert Advisor Start                        |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+   // Check for critical drawdown and close orders if necessary
+   if (IsDrawdownExceeded(drawdownLimit))
+   {
+      CloseAllOrders();
+      Alert('Critical drawdown reached. Closing all orders.');
+   }
+
+   // Implement trading strategies based on trading styles
+   // ...
+}
+
+//+------------------------------------------------------------------+
+//|                  Function to Check Drawdown Exceeded             |
+//+------------------------------------------------------------------+
+bool IsDrawdownExceeded(const double limit)
+{
+   double accountBalance = AccountBalance();
+   double accountEquity = AccountEquity();
+   double currentDrawdown = (accountBalance - accountEquity) / accountBalance;
+
+   return currentDrawdown > limit;
+}
+
+//+------------------------------------------------------------------+
+//|                   Function to Close All Orders                    |
+//+------------------------------------------------------------------+
+void CloseAllOrders()
+{
+   for (int i = OrdersTotal() - 1; i >= 0; i--)
+   {
+      if (OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+      {
+         if (OrderClose(OrderTicket(), OrderLots(), MarketInfo(OrderSymbol(), MODE_BID), 0, clrRed))
+         {
+            totalOrders--;
+         }
+      }
+   }
+}
